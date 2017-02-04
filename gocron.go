@@ -19,6 +19,7 @@
 package gocron
 
 import (
+	"reflect"
 	"sort"
 	"sync"
 	"time"
@@ -129,18 +130,27 @@ func (s *Scheduler) RunAllwithDelay(d int) {
 // Remove specific job j
 //TODO: (evdokimovn) size decreases even if no job found
 func (s *Scheduler) Remove(j interface{}) {
+	var found bool
+	t := reflect.TypeOf(j)
+	if t.Kind() != reflect.Func {
+		return
+	}
+	s.locker.Lock()
+	defer s.locker.Unlock()
 	i := 0
 	for ; i < s.size; i++ {
 		if s.jobs[i].jobFunc == getFunctionName(j) {
+			found = true
 			break
 		}
 	}
-
-	for j := (i + 1); j < s.size; j++ {
-		s.jobs[i] = s.jobs[j]
-		i++
+	if found {
+		for j := (i + 1); j < s.size; j++ {
+			s.jobs[i] = s.jobs[j]
+			i++
+		}
+		s.size = s.size - 1
 	}
-	s.size = s.size - 1
 }
 
 // Delete all scheduled jobs
