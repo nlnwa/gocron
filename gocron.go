@@ -20,6 +20,7 @@ package gocron
 
 import (
 	"sort"
+	"sync"
 	"time"
 )
 
@@ -39,6 +40,7 @@ type Scheduler struct {
 	// Array store jobs
 	jobs [MAXJOBNUM]*Job
 
+	locker sync.Mutex
 	// Size of jobs which jobs holding.
 	size int
 }
@@ -59,7 +61,8 @@ func (s *Scheduler) Less(i, j int) bool {
 
 // Create a new scheduler
 func NewScheduler() *Scheduler {
-	return &Scheduler{[MAXJOBNUM]*Job{}, 0}
+	var lock sync.Mutex
+	return &Scheduler{[MAXJOBNUM]*Job{}, lock, 0}
 }
 
 // Get the current runnable jobs, which shouldRun is True
