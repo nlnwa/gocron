@@ -41,6 +41,9 @@ type Scheduler interface {
 
 	// RunAllWithDelay runs all of the jobs regardless of wether or not they are pending with a delay
 	RunAllWithDelay(time.Duration)
+
+	//Add job to the scheduler
+	Add(*Job) bool
 }
 
 // NewScheduler create a new scheduler.
@@ -174,6 +177,13 @@ func (s *scheduler) Remove(j *Job) bool {
 	}
 
 	return false
+}
+
+func (s *scheduler) Add(j *Job) bool {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+	s.jobs = append(s.jobs, j)
+	return true
 }
 
 // Clear deletes all scheduled jobs
