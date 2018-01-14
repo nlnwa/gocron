@@ -8,7 +8,7 @@ import (
 
 // Scheduler contains jobs and a loop to run the jobs
 type Scheduler struct {
-	mutex      sync.RWMutex
+	sync.RWMutex
 	location   *time.Location
 	interval   time.Duration
 	collectors []Collector
@@ -26,30 +26,30 @@ func NewScheduler() *Scheduler {
 }
 
 func (s *Scheduler) AddJob(job *Job) {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
+	s.Lock()
+	defer s.Unlock()
 	s.collectors[0].(*defaultCollector).add(job)
 }
 
 func (s *Scheduler) AddCollector(collector Collector) *Scheduler {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
+	s.Lock()
+	defer s.Unlock()
 	s.collectors = append(s.collectors, collector)
 	return s
 }
 
 // Interval sets the interval between the check for pending jobs.
 func (s *Scheduler) Interval(d time.Duration) *Scheduler {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
+	s.Lock()
+	defer s.Unlock()
 	s.interval = d
 	return s
 }
 
 // Location sets the location of the scheduler.
 func (s *Scheduler) Location(location *time.Location) *Scheduler {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
+	s.Lock()
+	defer s.Unlock()
 	if s.isRunning {
 		s.location = location
 	}
@@ -58,8 +58,8 @@ func (s *Scheduler) Location(location *time.Location) *Scheduler {
 
 // runPending runs all of the jobs pending now.
 func (s *Scheduler) runPending(now time.Time) {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
+	s.Lock()
+	defer s.Unlock()
 
 	for i := range s.collectors {
 		jobs := s.collectors[i].GetJobs()
@@ -79,8 +79,8 @@ func (s *Scheduler) runPending(now time.Time) {
 
 // Start scheduler.
 func (s *Scheduler) Start() {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
+	s.Lock()
+	defer s.Unlock()
 
 	// only start the scheduler if it hasn't been started yet
 	if s.isRunning {
@@ -107,8 +107,8 @@ func (s *Scheduler) Start() {
 
 // Stop scheduler.
 func (s *Scheduler) Stop() {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
+	s.Lock()
+	defer s.Unlock()
 	if s.isRunning {
 		s.done <- struct{}{}
 		<-s.done
