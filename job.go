@@ -1,10 +1,12 @@
 package gocron
 
 import (
-	"errors"
-	"github.com/nlnwa/kronasje"
 	"reflect"
 	"time"
+
+	log "github.com/sirupsen/logrus"
+
+	"github.com/nlnwa/kronasje"
 )
 
 type Schedule interface {
@@ -61,9 +63,11 @@ func (j *Job) AddTask(task interface{}, params ...interface{}) *Job {
 	}
 
 	if taskValue.Type().NumIn() != len(paramValues) {
-		panic(errors.New("mismatched number of task parameters"))
+		log.Errorln("AddTask", "mismatched number of task parameters")
+		return nil
 	} else if taskValue.Kind() != reflect.Func {
-		panic(errors.New("task is not a function"))
+		log.Errorln("AddTask", "task is not a function")
+		return nil
 	}
 
 	// add the task and its params to the job
