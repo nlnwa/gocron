@@ -3,8 +3,6 @@ package gocron
 import (
 	"sync"
 	"time"
-
-	log "github.com/sirupsen/logrus"
 )
 
 // Scheduler contains jobs and a loop to run the jobs
@@ -71,7 +69,6 @@ func (s *Scheduler) runPending(now time.Time) {
 			if job.nextRun.After(now) {
 				continue
 			}
-			log.WithField("now", now).Infoln("Starting job")
 			go job.run()
 			job.lastRun = job.nextRun
 			job.nextRun = job.Schedule.Next(now)
